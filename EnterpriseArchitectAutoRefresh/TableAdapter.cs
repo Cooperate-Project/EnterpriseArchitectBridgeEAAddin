@@ -13,12 +13,12 @@ namespace EnterpriseArchitectAutoRefresh
     /// <summary>
     /// This class represents a logging table, maintained by a database trigger.
     /// </summary>
-    class TableListener
+    class TableAdapter
     {
         // Logging table information
-        private String table;
-        private String prefix;
-        private Repository repository;
+        private readonly String table;
+        private readonly String prefix;
+        private readonly Repository repository;
         private String timestamp;
 
         // Constants from the logging tables, must be similar to those in the Trigger-Generator
@@ -31,7 +31,7 @@ namespace EnterpriseArchitectAutoRefresh
         /// <param name="table">The table name of the EA-related mapping (e.G. "t_object")</param>
         /// <param name="prefix">The prefix of the logging tables from the Trigger-Generator (e.G. "ht_")</param>
         /// <param name="repositry">The currently opened repository</param>
-        public TableListener(String table, String prefix, Repository repositry)
+        public TableAdapter(String table, String prefix, Repository repositry)
         {
             this.table = table;
             this.prefix = prefix;
@@ -48,7 +48,10 @@ namespace EnterpriseArchitectAutoRefresh
         public List<String> getUpdates()
         {
 
-            String updatesXML = repository.SQLQuery(getStatementWithLastDate());
+            String updateStatement = "SELECT DATE_FORMAT(NOW(6), '%Y-%m-%d %H:%i:%s.%f') AS `TS`, `{0}` AS `ID` FROM `{1}` WHERE `{2}` >= STR_TO_DATE('{3}', '%Y-%m-%d %H:%i:%s.%f')";
+
+
+            String updatesXML = repository.SQLQuery(String.Format(updateStatement, COLUMN_ID, prefix + table, COLUMN_TIMESTAMP, timestamp));
 
             List<String> updateList = new List<String>();
 
@@ -71,16 +74,6 @@ namespace EnterpriseArchitectAutoRefresh
             }
 
             return updateList;
-        }
-
-        /// <summary>
-        /// Returns the statement to send to the database to get changes. NOTE: This is not similar to the Hibernate version of the statement!
-        /// </summary>
-        /// <returns></returns>
-        private String getStatementWithLastDate()
-        {
-            return "SELECT DATE_FORMAT(NOW(6), '%Y-%m-%d %H:%i:%s.%f') AS `TS`, `" + COLUMN_ID + "` AS `ID` FROM `" + prefix + table + "` WHERE `"
-                   + COLUMN_TIMESTAMP + "` >= STR_TO_DATE('" + timestamp + "', '%Y-%m-%d %H:%i:%s.%f')";
         }
 
         /// <summary>

@@ -47,13 +47,13 @@ namespace EnterpriseArchitectAutoRefresh
         /// Creates the table listeners from the list of monitored tables loaded from the plugin settings.
         /// </summary>
         /// <returns></returns>
-        private List<TableListener> createTableListeners()
+        private List<TableAdapter> createTableListeners()
         {
-            List<TableListener> listenerList = new List<TableListener>();
+            List<TableAdapter> listenerList = new List<TableAdapter>();
 
             foreach(String table in this.tables)
             {
-                listenerList.Add(new TableListener(table, prefix, repository));
+                listenerList.Add(new TableAdapter(table, prefix, repository));
             }
 
             return listenerList;
@@ -77,11 +77,11 @@ namespace EnterpriseArchitectAutoRefresh
         /// </summary>
         private void refreshAll()
         {
-            List<TableListener> listeners = createTableListeners();
+            List<TableAdapter> listeners = createTableListeners();
 
             while(running)
             {
-                foreach(TableListener listener in listeners)
+                foreach(TableAdapter listener in listeners)
                 {
                     sync(listener);
                 }
@@ -117,7 +117,7 @@ namespace EnterpriseArchitectAutoRefresh
         /// This method takes an Listener (a logging table filled by a trigger), gets the updates and refreshes the affected views.
         /// </summary>
         /// <param name="syncTable"></param>
-        private void sync(TableListener syncTable)
+        private void sync(TableAdapter syncTable)
         {
             List<String> updates = syncTable.getUpdates();
 

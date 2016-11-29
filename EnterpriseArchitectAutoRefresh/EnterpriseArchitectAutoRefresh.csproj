@@ -53,7 +53,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="TableListener.cs" />
+    <Compile Include="TableAdapter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
