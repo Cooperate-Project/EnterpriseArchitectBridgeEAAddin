@@ -9,7 +9,7 @@ This is an Add-in for Enterprise Architect. It enables automatic refreshing of c
 These logging tables can be created by using a generator like [IncrementalDBSyncUtils](https://github.com/Cooperate-Project/IncrementalDBSyncUtils).
 
 ## Installation
-Download the installer from our [https://dl.bintray.com/cooperate-project/EnterpriseArchitectBridgeEAAddin/installers](download repository). Choose the installer from the `latest` folder for up-to-date development versions and all other folders for stable release versions. Follow the instructions of the installer.
+Download the installer from our [download repository](https://dl.bintray.com/cooperate-project/EnterpriseArchitectBridgeEAAddin/installers). Choose the installer from the `latest` folder for up-to-date development versions and all other folders for stable release versions. Follow the instructions of the installer.
 
 ##Usage
 
