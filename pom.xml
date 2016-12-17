@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>de.cooperateproject</groupId>
+		<artifactId>de.cooperateproject.parent.maven</artifactId>
+		<version>1.0.2</version>
+	</parent>
+	<groupId>de.cooperateproject.eabridge.eaaddin</groupId>
+	<artifactId>main</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>Enterprise Architect Bridge EA Addin</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.deploy-plugin.version>2.8.2</maven.deploy-plugin.version>
+		<csharp.build.command>xbuild</csharp.build.command>
+		<csharp.build.configuration>Release</csharp.build.configuration>
+		<nsis.output.file>${project.name} ${project.version}.exe</nsis.output.file>
+		<bintray.deploy.plugin.version>0.1.1</bintray.deploy.plugin.version>
+		<bintray.deploy.serverId>cooperate-bintray</bintray.deploy.serverId>
+		<bintray.deploy.subject>cooperate-project</bintray.deploy.subject>
+		<bintray.deploy.repository>EnterpriseArchitectBridgeEAAddin</bintray.deploy.repository>
+		<bintray.deploy.package>installers</bintray.deploy.package>
+		<bintray.deploy.file>${project.build.directory}/${nsis.output.file}</bintray.deploy.file>
+		<bintray.deploy.replaceIfSnapshot>true</bintray.deploy.replaceIfSnapshot>
+	</properties>
+
+	<profiles>
+		<profile>
+			<activation>
+				<os>
+					<family>Windows</family>
+				</os>
+			</activation>
+			<properties>
+				<csharp.build.command>msbuild</csharp.build.command>
+			</properties>
+		</profile>
+	</profiles>
+
+	<build>
+		<plugins>
+
+			<plugin>
+				<groupId>com.googlecode.maven-download-plugin</groupId>
+				<artifactId>download-maven-plugin</artifactId>
+				<version>1.3.0</version>
+				<executions>
+					<execution>
+						<id>download-ea-dependency</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://github.com/jaxx/EATeX/raw/master/lib/Interop.EA.dll</url>
+							<outputDirectory>${project.basedir}/EnterpriseArchitectAutoRefresh/lib</outputDirectory>
+							<md5>ef035b0f58e07d0b501efc5a9c146def</md5>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.5.0</version>
+				<executions>
+					<execution>
+						<id>build-solution</id>
+						<phase>compile</phase>
+						<configuration>
+							<executable>${csharp.build.command}</executable>
+							<arguments>
+								<argument>/p:Configuration=${csharp.build.configuration}</argument>
+								<argument>EnterpriseArchitectAutoRefresh.sln</argument>
+							</arguments>
+						</configuration>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>clean-solution</id>
+						<phase>clean</phase>
+						<configuration>
+							<executable>${csharp.build.command}</executable>
+							<arguments>
+								<argument>/target:clean</argument>
+								<argument>/p:Configuration=${csharp.build.configuration}</argument>
+								<argument>EnterpriseArchitectAutoRefresh.sln</argument>
+							</arguments>
+						</configuration>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+					</execution> 					
+				</executions>
+			</plugin>   
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<phase>prepare-package</phase>
+						<id>copy-compiled-files</id>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<mkdir dir="${project.build.directory}/libraries"/>
+								<copy todir="${project.build.directory}/libraries">
+									<fileset dir="${project.basedir}/EnterpriseArchitectAutoRefresh/bin/${csharp.build.configuration}">
+										<include name="**/*.dll"/>
+										<include name="**/*.dll.config"/>
+									</fileset>
+								</copy>
+								<delete>
+									<fileset dir="${project.build.directory}/libraries" includes="*" id="fileset.externals">
+										<present present="both" targetdir="${project.basedir}/EnterpriseArchitectAutoRefresh/lib"/>
+									</fileset>
+								</delete>
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>nsis-maven-plugin</artifactId>
+				<version>1.0-alpha-1</version>
+				<executions>
+					<execution>
+						<phase>prepare-package</phase>
+						<id>generate-headerfile</id>
+						<goals>
+							<goal>generate-headerfile</goal>
+						</goals>
+					</execution>
+					<execution>
+						<phase>package</phase>
+						<id>make</id>
+						<goals>
+							<goal>make</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>gen-clean</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+						<configuration>
+							<filesets>
+								<fileset>
+									<directory>${project.basedir}/EnterpriseArchitectAutoRefresh/lib</directory>
+								</fileset>
+							</filesets>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>${maven.deploy-plugin.version}</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>de.cooperateproject.maven</groupId>
+				<artifactId>de.cooperateproject.maven.bintray.deploy</artifactId>
+				<version>${bintray.deploy.plugin.version}</version>
+				<executions>
+					<execution>
+						<id>bintray-deployment</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>

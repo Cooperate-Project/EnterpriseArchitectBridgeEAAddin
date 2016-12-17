@@ -1,0 +1,19 @@
+sudo: required
+dist: trusty
+language: csharp
+addons:
+  apt:
+    packages:
+    - nsis
+before_install:
+  - jdk_switcher use oraclejdk8
+  - git clone --depth 1 https://github.com/Cooperate-Project/BuildUtils.git /tmp/BuildUtils
+  - . /tmp/BuildUtils/travisci/setup.sh
+script:
+- mavenBuild.sh
+cache:
+  directories:
+  - "$HOME/.m2/repository"
+env:
+  global:  
+  - secure: "Ob+qfE2J3+OB9ImXWUla+vwX+8okMHb7twxtXVKQj8JCRnhwwXhKRT0XcAnSj44JHpGQwEWITSB4aQcJKl2zMvlqalQ+dwCXNLo5gBADxx62FN5JrcrmewsYmbelcCRHhOOCFmTHVgZ45cFs03R4GmNTxxviusI1V2oK52fYukCQGxry/cutQxbTdsKyS1+SDk/0P9lBhWKBS8iSbv6O9g++p8YsA/9D7dcVQ1gHjJDvQkujFYXjPVX5Tz/4dyWVEFytAN7L9plMnXAks1k9eMLePv2oYHtDzizl+qA1mm5pzQLdKnGzkkbjVJ/QWfCmE1+PrrMh/sVIwdKTSwQ8DNrMH1Z/xSuyjPJ1J9OkL4IPxwM9QS6vwZOAmixJyfYkGW2L6h3Xo96UiFtcYmo9k6sPcdicRHJisi65qjIadTWCRtji9317Jdlb6Xvek4zRQqf2md0GpvYjYXOzPhMwXZAgaReKbMe2bM6KVZ38QIkfojCE3FAFeqpU67bkBRun8KsqJmnjodyqVOMPtiXWo62g3q5GGn6RrMTzFd0keWvMdJd4ARarQtjvlY6ObaUqTTOXV+Qep9vni0hyP+ObsnOK3YduaH2SQzCAPCPRabjMv+Odgi24GE6AyQ1BPGOiz5d+3ryRzmYxE4LMQBkNf4JhF4Yp5IWZGTP+PC6szBU="
